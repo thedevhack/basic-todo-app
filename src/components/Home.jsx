@@ -2,6 +2,10 @@
 import { Box, Stack, TextField, Typography, DialogContentText,DialogActions, Container, Button, Dialog, DialogContent, DialogTitle } from '@mui/material'
 import CategoryCard from './CategoryCard'
 import { useEffect, useState } from 'react'
+import { atom } from 'recoil'
+
+
+
 
 function useTodos(){
 
@@ -23,10 +27,15 @@ function useTodos(){
 
 function Home(){
 
-    const [todos, setTodos] = useTodos();
+    // const [todos, setTodos] = useTodos();
     const [openCategoryAdd, setopenCategoryAdd] = useState(false);
     const [openTodoAdd, setopenTodoAdd] = useState(false);
     const [newCategory, setNewCategory] = useState("")
+
+    const todosState = atom({
+        key: 'todosState',
+        default: useTodos()
+    })
 
     const handleAddCategoryOpen = () => {
         setopenCategoryAdd(true);
