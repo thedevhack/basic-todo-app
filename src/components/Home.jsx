@@ -2,40 +2,14 @@
 import { Box, Stack, TextField, Typography, DialogContentText,DialogActions, Container, Button, Dialog, DialogContent, DialogTitle } from '@mui/material'
 import CategoryCard from './CategoryCard'
 import { useEffect, useState } from 'react'
-import { atom } from 'recoil'
+import { atom, atomFamily, useRecoilValue, useRecoilState } from 'recoil'
+import { todosCategoriesAtom, categoriesAtom }  from '../recoil/atoms'
 
-
-
-
-function useTodos(){
-
-    const defaultTodos = {
-        "Personal":[{id:1,title:"Go to Gym",done:false}, {id:3,title:"Go buy vegetables",done:false}],
-        "Work":[{id:5,title:"Go review PR",done:false}, {id:7,title:"Go buy new Mac",done:false}]}
-
-    const [todos, setTodos] = useState(() => {
-        const fromStorage = localStorage.getItem('todos')
-        return fromStorage ? JSON.parse(fromStorage) : defaultTodos
-    })
-
-    useEffect(() => {
-        localStorage.setItem('todos', JSON.stringify(todos))
-    }, [todos])
-    
-    return [todos, setTodos]
-}
 
 function Home(){
-
-    // const [todos, setTodos] = useTodos();
     const [openCategoryAdd, setopenCategoryAdd] = useState(false);
-    const [openTodoAdd, setopenTodoAdd] = useState(false);
     const [newCategory, setNewCategory] = useState("")
 
-    const todosState = atom({
-        key: 'todosState',
-        default: useTodos()
-    })
 
     const handleAddCategoryOpen = () => {
         setopenCategoryAdd(true);
@@ -46,43 +20,7 @@ function Home(){
         setNewCategory("")
     }
     
-    function toggleTodo(idd){
-        setTodos(prevTodos => {
-            const newTodos = {}
-            
-            for (let category in prevTodos) {
-                newTodos[category] = prevTodos[category].filter((todo, idx) => {
-                    if (todo.id !== idd){
-                        // return {...todo, done:!todo.done}
-                        return true
-                    }
-                    return false
-                    // return todo
-                })
-            }
-            return newTodos
-
-        })
-    }
-
-    function addNewTodo(category, newTodoText){
-        setTodos((prevTodos) => {
-            const newTodos = {}
-
-            for (let categoryy in prevTodos){
-                newTodos[categoryy] = prevTodos[categoryy]
-                if (categoryy === category){
-                    
-                    newTodos[categoryy].push({
-                        id:new Date().valueOf(),
-                        title:newTodoText,
-                        done:false
-                    })
-                }
-            }
-            return newTodos
-        })
-    }
+    const [categories, setCategories] = useRecoilState(categoriesAtom);
 
     return <div>
         <div style={{ display:"flex", justifyContent:"center", padding:"20px" }}>
@@ -90,8 +28,8 @@ function Home(){
         </div>
         <Box component={"div"} sx={{p:2}}>
             <Stack spacing={3} direction={"row"} useFlexGap sx={{ justifyContent:"space-around", flexWrap: 'wrap' }}>
-                {(Object.entries(todos).map(([category, categoryTodos]) => {
-                    return <CategoryCard key={category} todos={categoryTodos} category={category} toggleTodo={toggleTodo} addTodo={addNewTodo} />
+                {(categories.map((category) => {
+                    return <CategoryCard key={category} category={category} />
                 }))}
             </Stack>
             <div style={{ display:"flex", justifyContent:"center", paddingTop:"20px" }}>
@@ -129,19 +67,16 @@ function Home(){
                         <Button 
                         type="button"
                         onClick={() => {
-                            if (!(newCategory in todos)){
-                                setTodos(prevTodos => {
-                                    const newTodos = {}
-                                    for (let category in todos){
-                                        newTodos[category] = prevTodos[category]
-
-                                    }
-                                    newTodos[newCategory] = []
-                                    return newTodos
+                            if (!(newCategory in categories)){
+                                setCategories(prevCategories => {
+                                    const newCategories = []
+                                    newCategories.push(...prevCategories, newCategory)
+                                    return newCategories
                                 })
                             }else{
                                 console.log("Category already present")
                             }
+                            console.log(categories)
                             handleAddCategoryClose()
                         }}
                         >Add</Button>

@@ -3,9 +3,11 @@ import { Stack } from '@mui/material'
 import Todo from './Todo'
 import AddIcon from '@mui/icons-material/Add';
 import { useState } from 'react';
+import { todosCategoriesAtom } from '../recoil/atoms';
+import { useRecoilState } from 'recoil';
 
 
-function CategoryCard({todos, category, toggleTodo, addTodo}){
+function CategoryCard({category}){
 
     const [TodoAddDialogOpen, setTodoAddDialogOpen] = useState(false)
     const [newTodo, setNewTodo] = useState("")
@@ -18,6 +20,8 @@ function CategoryCard({todos, category, toggleTodo, addTodo}){
         setTodoAddDialogOpen(false)
         setNewTodo("")
     }
+
+    const [todos, setTodos] = useRecoilState(todosCategoriesAtom(category))
 
 
     return <Card sx={{ width:"320px", height:"250px", maxHeight:"250px", overflowY: "scroll", backgroundColor:"#fefeff", backdropFilter: 'blur(10px)',border: '1px solid rgba(255,255,255,0.3)',boxShadow: 3, borderRadius: 3, }}>
@@ -60,7 +64,17 @@ function CategoryCard({todos, category, toggleTodo, addTodo}){
                 <DialogActions>
                     <Button variant='standard' onClick={closeTodoAddDialog}>Cancel</Button>
                     <Button variant='standard' onClick={() => {
-                        addTodo(category, newTodo)
+                        // addTodo(category, newTodo)
+                        setTodos(prevTodos => {
+                            const newTodos = []
+                            newTodos.push(...prevTodos, {
+                                id:new Date().valueOf(),
+                                title:newTodo,
+                                done:false
+                            })
+                            return newTodos
+                        })
+                        console.log(todos)
                         closeTodoAddDialog()
                     }}>Add</Button>
                 </DialogActions>
@@ -69,7 +83,7 @@ function CategoryCard({todos, category, toggleTodo, addTodo}){
         </div>
         <Stack spacing={1} sx={{ paddingTop:"3px" }}>
             {todos.map(todo => {
-                return <Todo key={todo.id} todo={todo} toggleFunc={toggleTodo}/>
+                return <Todo key={todo.id} idd1={todo.id} category={category} title={todo.title}/>
             })}
         </Stack>
     </Card>
